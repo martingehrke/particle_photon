@@ -1,13 +1,12 @@
 // This #include statement was automatically added by the Particle IDE.
-#include "HttpClient/HttpClient.h"
-
-// This #include statement was automatically added by the Particle IDE.
 #include "PietteTech_DHT/PietteTech_DHT.h"
 
 //DHT systems defines
 #define DHTTYPE  DHT22              // Sensor type DHT11/21/22/AM2301/AM2302
 #define DHTPIN   2              // Digital pin for communications
 #define DHT_SAMPLE_INTERVAL   120000  // Sample every two seconds
+//#define DHT_SAMPLE_INTERVAL   60000  // Sample every second
+#define LEDPIN 1
 
 //declaration
 void dht_wrapper(); // must be declared before the lib initialization
@@ -33,9 +32,14 @@ String hs = String();
 // Spark setup
 void setup()
 {
+    pinMode(LEDPIN, OUTPUT);
+    
     // tell the world we're online
     Particle.publish("online");
     Particle.publish("version", version, 60, PRIVATE);
+    
+    Particle.variable("temperature", tfs);
+    Particle.variable("humidity", hs);
     
     DHTnextSampleTime = 0;  // Start the first sample immediately
 }
@@ -58,7 +62,6 @@ void loop() {
     }
     
     
-
     if (!DHT.acquiring()) {     // has sample completed?
 
         // get DHT status
@@ -98,6 +101,8 @@ void loop() {
     Particle.publish("STATUS", status, 60, PRIVATE);
 
      if(result == DHTLIB_OK) {
+         
+        digitalWrite(LEDPIN, HIGH);
         
         h = DHT.getHumidity();
         //tc = DHT.getCelsius();
@@ -113,14 +118,12 @@ void loop() {
         //String datetime = Time.timeStr();
         //Particle.publish("UT", datetime, 60, PRIVATE);
         
-        Particle.variable("temperature", tfs);
-        Particle.variable("humidity", hs);
-        //Particle.variable("updatetime", Time.year());
      }   
      
      else {
-        Particle.variable("temperature", NULL);
-        Particle.variable("humidity", NULL);
+        digitalWrite(LEDPIN, LOW);
+        tfs = String();
+        hs = String();
      }
 
         n++;  // increment counter
