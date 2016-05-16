@@ -4,8 +4,8 @@
 //DHT systems defines
 #define DHTTYPE  DHT22              // Sensor type DHT11/21/22/AM2301/AM2302
 #define DHTPIN   2              // Digital pin for communications
-#define DHT_SAMPLE_INTERVAL   120000  // Sample every two seconds
-//#define DHT_SAMPLE_INTERVAL   60000  // Sample every second
+//#define DHT_SAMPLE_INTERVAL   120000  // Sample every two minutes
+#define DHT_SAMPLE_INTERVAL   60000  // Sample every minute
 #define LEDPIN 1
 
 //declaration
@@ -22,8 +22,8 @@ int n;                              // counter
 float tf;
 float tc;
 float h;
-String tfs = String();
-String hs = String();
+char tfs[64];
+char hs[64];
 
 //
 // Functions
@@ -98,33 +98,31 @@ void loop() {
             break;
         }//end switch
         
-    Particle.publish("STATUS", status, 60, PRIVATE);
+        Particle.publish("STATUS", status, 60, PRIVATE);
 
-     if(result == DHTLIB_OK) {
+        if(result == DHTLIB_OK) {
          
-        digitalWrite(LEDPIN, HIGH);
+            digitalWrite(LEDPIN, HIGH);
         
-        h = DHT.getHumidity();
-        //tc = DHT.getCelsius();
-        tf = DHT.getFahrenheit();
+            h = DHT.getHumidity();
+            //tc = DHT.getCelsius();
+            tf = DHT.getFahrenheit();
         
-        tfs = String(tf,2);
-        //String tcs(tc,2);
-        hs = String(h,2);
+            sprintf(tfs,"%.2f",tf);
+            sprintf(hs,"%.2f",h);
 
-        //Particle.publish("tempF", tfs, 60, PRIVATE);
-        //Particle.publish("tempC", tcs, 60, PRIVATE);
-        //Particle.publish("humidity", hs, 60, PRIVATE);
-        //String datetime = Time.timeStr();
-        //Particle.publish("UT", datetime, 60, PRIVATE);
+            //Particle.publish("tempF", tfs, 60, PRIVATE);
+            //Particle.publish("tempC", tcs, 60, PRIVATE);
+            //Particle.publish("humidity", hs, 60, PRIVATE);
+            //String datetime = Time.timeStr();
+            //Particle.publish("UT", datetime, 60, PRIVATE);
         
-     }   
+        }//end DHTLIB_OK if
      
-     else {
-        digitalWrite(LEDPIN, LOW);
-        tfs = String();
-        hs = String();
-     }
+        else {
+            digitalWrite(LEDPIN, LOW);
+            //also want to set vars to something like NULL
+        }
 
         n++;  // increment counter
         bDHTstarted = false;  // reset the sample flag so we can take another
